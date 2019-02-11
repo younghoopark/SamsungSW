@@ -1,0 +1,53 @@
+#include <iostream>
+#include <algorithm>
+#include <array>
+
+using namespace std;
+
+int N;
+int T[16];
+int P[16];
+int M[16] = { 0, };
+
+
+int main()
+{
+	cin >> N;
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> T[i] >> P[i];
+	}
+
+
+	if (T[1] > N)
+	{
+		M[1] = 0;
+	}
+	else
+	{
+		M[1] = P[1];
+	}
+	int tmp;
+	for (int i = 2; i <= N; i++)
+	{
+		if (T[i] + i > N + 1)
+		{
+			P[i] = 0;
+		}
+		for (int j = i-1; j >= 1; j--)
+		{
+			if (T[j] <= i - j)
+			{
+				tmp = M[j] + P[i];
+				M[i] = max(tmp, M[i]);
+			}
+			else
+			{
+				M[i] = max(M[i],P[i]);
+			}
+		}
+	}
+	cout << *max_element(M, M + 16) << endl;
+
+	return 0;
+}
