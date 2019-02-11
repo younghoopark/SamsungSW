@@ -1,0 +1,134 @@
+#include <iostream>
+#include <algorithm>
+#include <deque>
+
+using namespace std;
+
+
+int N, M;		//N은 ROW개수 M은 COLUMN 개수
+int map[9][9] = { 0, };
+int map_tmp[9][9] = { 0, };
+int maxvalue = 0;
+deque<pair<int, int>> dq;
+int dir[4][2] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+void map_cpy(int (*a)[9], int (*b)[9])
+{
+	for (int i = 1; i <= N; i++)
+	{
+		copy(a[i], a[i] + 9, b[i]);
+	}
+}
+void count_safezone()		//안전구역의 개수를 세어준 후, 안전구역의 최대값을 업데이트 해준다.
+{
+	int spreadmap[9][9];
+	map_cpy(map_tmp, spreadmap);
+	/* 1.바이러스를 DFS or BFS로 퍼트려서 map을 숫자2로 업데이트 시켜줌 */
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			if (spreadmap[i][j] == 2)
+			{
+				dq.push_back(make_pair(i, j));
+			}
+		}
+	}
+	while (!dq.empty())
+	{
+		int row = dq.front().first;
+		int col = dq.front().second;
+		dq.pop_front();
+		for (int i = 0; i < 4; i++)
+		{
+			int nrow = row + dir[i][0];
+			int ncol = col + dir[i][1];
+			if (nrow >= 1 && nrow <= N && ncol >= 1 && ncol <= M)
+			{
+				if (spreadmap[nrow][ncol] == 0)
+				{
+					spreadmap[nrow][ncol] = 2;
+					dq.push_back(make_pair(nrow, ncol));
+				}
+			}
+			
+		}
+
+	}
+
+	/* 2. 업데이트 된 map을 2중 for문을 통해 0의 개수를 세어준 후 cnt 업데이트 */
+	int cnt = 0;
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			if (spreadmap[i][j] == 0)
+			{
+				cnt++;
+			}
+		}
+	}
+
+
+	/* 3. 기존의 최대 안전구역 개수(maxvalue)와 이번에 구한 안전구역의 개수(cnt)를 비교해서 maxvalue를 업데이트 */
+	maxvalue = max(maxvalue, cnt);		//안전구역 최대값 없데이트
+}
+
+void update_map(int num)			//map에 1 세개를 배치시킨 상태로 업데이트
+{
+	if (num == 3)			//재귀 종료 조건
+	{
+		count_safezone();
+		return;
+	}
+	else
+	{
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 1; j <= M; j++)
+			{
+				if (map_tmp[i][j] == 0)
+				{
+					map_tmp[i][j] = 1;
+					update_map(num + 1);
+					map_tmp[i][j] = 0;
+				}
+			}
+		}
+	}
+}
+
+int main()
+{
+	int zerocnt = 0;		//map에서 0의 개수
+	cin >> N >> M;
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			cin >> map[i][j];
+			if (map[i][j] == 0)
+			{
+				zerocnt++;
+			}
+		}
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			if (map[i][j] == 0)
+			{
+				map_cpy(map, map_tmp);
+				map_tmp[i][j] = 1;
+				update_map(1);
+				map_tmp[i][j] = 0;
+			}
+			
+		}
+		count_safezone();
+	}
+	cout << maxvalue << endl;
+
+	return 0;
+}
