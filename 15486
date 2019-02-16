@@ -1,0 +1,28 @@
+#include <iostream>
+
+using namespace std;
+#define MAX(X, Y) (X) > (Y) ? (X) : (Y)
+int T[1500001], P[1500001], DP[1500001], N;
+int maxvalue = 0;
+
+int main()
+{
+	cin >> N;
+	int i, j;
+	for (i = 1; i <= N; i++)
+	{
+		cin >> T[i] >> P[i];
+	}
+	for (i = 1; i <= N + 1; i++)
+	{
+		maxvalue = MAX(maxvalue, DP[i]);
+		if (T[i] + i > N + 1)
+		{
+			continue;
+		}
+		DP[i + T[i]] = MAX(maxvalue + P[i], DP[i + T[i]]);
+	}
+	cout << maxvalue << endl;
+
+	return 0;
+}
