@@ -1,0 +1,112 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int> > t;
+int k;	//회전 횟수
+int n, dir;	//회전 시킬 톱니 번호와 회전시킬 방향
+int totalpoints = 0;
+int main()
+{
+	int i, j, l;
+	t.resize(4);
+	for (i = 0; i < 4; i++)
+	{
+		t[i].resize(8);
+	}
+	for (i = 0; i < 4; i++)
+	{
+		for (j = 0; j < 8; j++)
+		{
+			scanf("%1d", &t[i][j]);
+		}
+	}
+	cin >> k;
+	for (i = 0; i < k; i++)
+	{
+		vector<vector<int> >copyt(t);
+		cin >> n >> dir;			//dir = 1 -> 시계방향,   dir = -1 -> 반시계방향
+		n = n - 1;
+		if (dir == 1)			//시계방향 회전
+		{
+			t[n][0] = copyt[n][7];
+			for (j = 0; j < 7; j++)
+			{
+				t[n][j + 1] = copyt[n][j];
+			}
+		}
+		else if (dir == -1)		//반시계방향 회전
+		{
+			t[n][7] = copyt[n][0];
+			for (j = 0; j < 7; j++)
+			{
+				t[n][j] = copyt[n][j + 1];
+			}
+		}
+		int copydir = dir;
+		for (j = n; j < 3; j++)				//n번째 톱니바퀴를 기준으로, 오른쪽 톱니바퀴들 회전
+		{
+			if (copyt[j][2] == copyt[j + 1][6])
+			{
+				break;
+			}
+			else
+			{
+				if (dir == 1)		//얘는 dir = -1, 즉 반시계방향으로 회전
+				{
+					t[j + 1][7] = copyt[j + 1][0];
+					for (l = 0; l < 7; l++)
+					{
+						t[j + 1][l] = copyt[j + 1][l + 1];
+					}
+					dir = -1;
+				}
+				else if (dir == -1)			//얘는 dir = 1, 즉 시계방향으로 회전
+				{
+					t[j + 1][0] = copyt[j + 1][7];
+					for (l = 0; l < 7; l++)
+					{
+						t[j + 1][l + 1] = copyt[j + 1][l];
+					}
+					dir = 1;
+				}
+			}
+		}
+		dir = copydir;
+		for (j = n; j > 0; j--)			//n번째 톱니바퀴를 기준으로 왼쪽 톱니바퀴들 회전
+		{
+			if (copyt[j][6] == copyt[j - 1][2])
+			{
+				break;
+			}
+			else
+			{
+				if (dir == 1)
+				{
+					t[j - 1][7] = copyt[j - 1][0];
+					for (l = 0; l < 7; l++)
+					{
+						t[j - 1][l] = copyt[j - 1][l + 1];
+					}
+					dir = -1;
+				}
+				else if (dir == -1)
+				{
+					t[j - 1][0] = copyt[j - 1][7];
+					for (l = 0; l < 7; l++)
+					{
+						t[j - 1][l + 1] = copyt[j - 1][l];
+					}
+					dir = 1;
+				}
+			}
+		}
+	}
+	if (t[0][0] == 1) totalpoints += 1;
+	if (t[1][0] == 1) totalpoints += 2;
+	if (t[2][0] == 1) totalpoints += 4;
+	if (t[3][0] == 1) totalpoints += 8;
+	cout << totalpoints << endl;
+	return 0;
+}
