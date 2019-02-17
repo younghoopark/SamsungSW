@@ -1,0 +1,87 @@
+#include <iostream>
+#include <climits>
+using namespace std;
+
+int N;
+int S[21][21];
+int sum1 = 0, sum2 = 0, minval = 0;			//minval = abs(sum1 - sum2)
+int visited[21];
+int ans = INT_MAX;
+
+void findans()		//팀 사이의 전력차이를 구해주는 함수
+{
+	int i, j, k;
+	int startsum = 0, linksum = 0;
+	int start[21], link[21];
+	j = 1;
+	k = 1;
+	for (i = 1; i <= N; i++)
+	{
+		if (visited[i])
+		{
+			start[j++] = i;
+		}
+		else
+		{
+			link[k++] = i;
+		}
+	}
+	
+	
+	for (i = 1; i <= N / 2; i++)
+	{
+		for (j = 1; j <= N / 2; j++)
+		{
+			if (i < j)
+			{
+				startsum += (S[start[i]][start[j]] + S[start[j]][start[i]]);
+				linksum += (S[link[i]][link[j]] + S[link[j]][link[i]]);
+			}
+		}
+	}
+	if (abs(startsum - linksum) < ans)
+	{
+		ans = abs(startsum - linksum);
+	}
+
+}
+
+void dfs(int v, int len)
+{
+	int i;
+	
+	if (N / 2 == len)
+	{
+		findans();
+	}
+	else
+	{
+		for (i = v + 1; i <= N; i++)
+		{
+			if (!visited[i])
+			{
+				visited[i] = true;
+				dfs(i, len + 1);
+			}
+		}
+	}
+	visited[v] = false;
+}
+int main()
+{
+	cin >> N;
+	int i, j;
+	for (i = 1; i <= N; i++)
+	{
+		for (j = 1; j <= N; j++)
+		{
+			cin >> S[i][j];
+		}
+	}
+	
+	dfs(0, 0);
+	cout << ans << endl;
+
+
+	return 0;
+}
