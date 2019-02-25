@@ -1,0 +1,180 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+int N, L, map[100][100], ans = 0, cnt;
+bool visited[100];
+int main()
+{
+	cin >> N >> L;
+	int i, j, k;
+	for (i = 0; i < N; i++)
+	{
+		for (j = 0; j < N; j++)
+		{
+			cin >> map[i][j];
+		}
+	}
+
+	/* row 검사 */
+	for (i = 0; i < N; i++)
+	{
+		memset(visited, false, sizeof(visited));
+		cnt = 1;
+		for (j = 0; j < N-1; j++)
+		{
+			if (map[i][j] == map[i][j + 1])
+			{
+				cnt++; continue;
+			}
+			else if (map[i][j] - map[i][j + 1] == -1)		//다음 칸의 높이가 1 높을 경우
+			{
+				if (cnt >= L)
+				{
+					int len = 0;
+					for (k = j; k >= 0; k--)
+					{
+						if (visited[k] == true)
+						{
+							break;
+						}
+						else
+						{
+							len++;
+						}
+					}
+					if (len >= L)
+					{
+						cnt = 1; continue;		//경사로를 놓을 수 있다면
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;			//경사로를 놓을 수 없다면
+				}
+			}
+			else if (map[i][j] - map[i][j + 1] == 1)		//다음 칸의 높이가 1 낮을 경우
+			{
+				cnt = 1;
+				for (k = j + 1; k < N-1; k++)
+				{
+					if (map[i][k] == map[i][k + 1])
+					{
+						cnt++;
+					}
+					else
+					{
+						break;
+					}
+				}
+				if (cnt >= L)		//경사로를 놓는다
+				{
+					for (k = j + 1; k < j + 1 + L; k++)
+					{
+						visited[k] = true;
+					}
+					cnt = 1; continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			else				//다음 칸과 높이도 다르고, 높이차가 1도 아닐 경우에는, 어떠한 상황에도 경사로를 놓을 수 없으므로 berak
+			{
+				break;
+			}
+		}
+		if (j == N - 1)
+		{
+			//cout << "ansrow : " << i << endl;
+			ans++;
+		}
+	}
+	/* col 검사*/
+	for (i = 0; i < N; i++)
+	{
+		memset(visited, false, sizeof(visited));
+		cnt = 1;
+		for (j = 0; j < N - 1; j++)
+		{
+			if (map[j][i] == map[j + 1][i])
+			{
+				cnt++; continue;
+			}
+			else if (map[j][i] - map[j + 1][i] == -1)		//다음 칸의 높이가 1 높을 경우
+			{
+				if (cnt >= L)
+				{
+					int len = 0;
+					for (k = j; k >= 0; k--)
+					{
+						if (visited[k] == true)
+						{
+							break;
+						}
+						else
+						{
+							len++;
+						}
+					}
+					if (len >= L)
+					{
+						cnt = 1; continue;		//경사로를 놓을 수 있다면
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;			//경사로를 놓을 수 없다면
+				}
+			}
+			else if (map[j][i] - map[j + 1][i] == 1)		//다음 칸의 높이가 1 낮을경우
+			{
+				cnt = 1;
+				for (k = j + 1; k < N - 1; k++)
+				{
+					if (map[k][i] == map[k + 1][i])
+					{
+						cnt++;
+					}
+					else
+					{
+						break;
+					}
+				}
+				if (cnt >= L)
+				{
+					for (k = j + 1; k < j + 1 + L; k++)
+					{
+						visited[k] = true;
+					}
+					cnt = 1; continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			else											//높이가 같지도 않고, 차이가 1도 아닌경우, 지나갈 수 있는 길이 아니므로 break
+			{
+				break;
+			}
+		
+		}
+		if (j == N - 1)
+		{
+			ans++;
+			//cout << "anscol : " << i << endl;
+		}
+	}
+	cout << ans << endl;
+	return 0;
+}
