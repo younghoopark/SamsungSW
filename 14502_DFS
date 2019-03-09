@@ -1,0 +1,106 @@
+#include <iostream>
+#include <array>
+#include <vector>
+using namespace std;
+
+int n, m, map[8][8], tmp[8][8], ans =  0;		//n = row길이, m = col 길이
+bool visited[8][8];					//벽을 세웠던 곳을 마킹하기 위한 visited변수
+int udlr[4][2] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+
+int countsafezone()
+{
+	int cnt = 0;
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if (tmp[i][j] == 0)
+			{
+				cnt++;
+			}
+		}
+	}
+	return cnt;
+}
+
+void spread(int r, int c)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int newr = r + udlr[i][0];
+		int newc = c + udlr[i][1];
+		if (newr < 0 || newr >= n || newc < 0 || newc >= m)
+		{
+			continue;
+		}
+		if (tmp[newr][newc] == 0)
+		{
+			tmp[newr][newc] = 2;
+			spread(newr, newc);
+		}
+	}
+}
+
+void spreadvirus()
+{
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			tmp[i][j] = map[i][j];
+		}
+	}
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if (tmp[i][j] == 2)
+			{
+				spread(i, j);
+			}
+		}
+	}
+}
+void buildbyuk(int byuknum)
+{
+	if (byuknum == 3)
+	{
+		spreadvirus();
+		int cnt = countsafezone();
+		if (cnt > ans)
+		{
+			ans = cnt;
+		}
+		return;
+	}
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			if (!visited[i][j] && map[i][j] == 0)
+			{
+				visited[i][j] = true;
+				map[i][j] = 1;
+				buildbyuk(byuknum + 1);
+				visited[i][j] = false;
+				map[i][j] = 0;
+			}
+		}
+	}
+}
+int main()
+{
+	cin >> n >> m;
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			cin >> map[i][j];
+		}
+	}
+	
+	buildbyuk(0);
+	cout << ans << endl;
+	return 0;
+}
