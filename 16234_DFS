@@ -1,0 +1,90 @@
+#include <iostream>
+#include <cmath>
+#include <cstring>
+using namespace std;
+int N, L, R, map[50][50], beforemap[50][50], visited[50][50], ans = 0, cnt[2501], sum[2501];
+int udlr[4][2] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+bool check_same_before()
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			if (map[i][j] != beforemap[i][j])
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void updatemap(int level)
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			map[i][j] = sum[visited[i][j]] / cnt[visited[i][j]];
+		}
+	}
+}
+void movepeople(int r, int c, int level)			//dfs
+{
+	visited[r][c] = level;
+	cnt[level]++;
+	sum[level] += map[r][c];
+	for (int i = 0; i < 4; i++)
+	{
+		int newr = r + udlr[i][0];
+		int newc = c + udlr[i][1];
+		if (newr < 0 || newr >= N || newc < 0 || newc >= N)
+		{
+			continue;
+		}
+		int diff = abs(map[r][c] - map[newr][newc]);
+		if (visited[newr][newc] == 0 && diff >= L & diff <= R)
+		{
+			movepeople(newr, newc, level);
+		}
+	}
+}
+int main()
+{
+	cin >> N >> L >> R;
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> map[i][j];
+		}
+	}
+	int level;
+	while (1)
+	{
+		level = 1;
+		memcpy(beforemap, map, sizeof(map));		//beforemap에 map배열값 복사
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (visited[i][j] == 0)
+				{
+					cnt[level] = 0;
+					sum[level] = 0;
+					movepeople(i, j, level);				//visited배열 업데이트
+					level++;
+				}
+			}
+		}
+		updatemap(level);
+		if (check_same_before())
+		{
+			break;
+		}
+		ans++;
+		memset(visited, 0, sizeof(visited));	//visited배열 0으로 초기화
+	}
+	cout << ans << endl;
+	return 0;
+}
