@@ -41,7 +41,7 @@ void dfs(int startidx, int length) {
 	{
 		if (!visited[i]) {
 			visited[i] = true; v.push_back(i);
-			dfs(++startidx, length + 1);
+			dfs(i+1, length + 1);
 			visited[i] = false; v.pop_back();
 		}
 	}
