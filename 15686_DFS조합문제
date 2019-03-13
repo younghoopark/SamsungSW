@@ -1,0 +1,72 @@
+/* 16:30 ~ 17:40 */
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+
+struct CHICKHOUSE {
+	int r, c;
+};
+struct HOME {
+	int r, c;
+};
+
+int n, m, map[50][50], ans = 60000;
+CHICKHOUSE ch[13]; int chidx = 0; bool visited[13];
+HOME hm[101]; int hmidx = 0;
+vector<int> v;
+
+void calcul_distance() {
+	int dist = 0;
+	int chickdist;
+	for (int i = 0; i < hmidx; i++) {
+		chickdist = 60000;		//충분히 큰 수
+		for (int j = 0; j < m; j++) {
+			chickdist = MIN(chickdist, abs(hm[i].r - ch[v[j]].r) + abs(hm[i].c - ch[v[j]].c));
+		}
+		dist += chickdist;
+	}
+	
+	if (dist < ans) {
+		ans = dist;
+	}
+}
+void dfs(int startidx, int length) {
+	if (length == m) {
+		calcul_distance();
+		return;
+	}
+	for (int i = startidx; i < chidx; i++)
+	{
+		if (!visited[i]) {
+			visited[i] = true; v.push_back(i);
+			dfs(++startidx, length + 1);
+			visited[i] = false; v.pop_back();
+		}
+	}
+}
+
+int main()
+{
+	cin >> n >> m;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cin >> map[i][j];
+			if (map[i][j] == 1) {		//집
+				hm[hmidx].r = i;
+				hm[hmidx].c = j;
+				hmidx++;
+			}
+			else if (map[i][j] == 2) {		//치킨집
+				ch[chidx].r = i;
+				ch[chidx].c = j;
+				chidx++;
+			}
+		}
+	}
+	dfs(0, 0);
+	cout << ans << endl;
+
+	return 0;
+}
