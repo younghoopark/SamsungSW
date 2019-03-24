@@ -1,0 +1,54 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int A[1000000], boo[1000000];
+int main()
+{
+	int n, b, c;
+	long long ans = 0;
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		cin >> A[i];
+	}
+	cin >> b >> c;
+	sort(A, A + n);
+
+	for (int i = 0; i < n; i++) {		//총 감독관 배치
+		A[i] -= b;
+		if (A[i] <= 0) {		//총 감독관의 배치 만으로, 더이상 부 감독관이 필요가 없을 때에는, vector에 넣어준다.
+			boo[i] = 0;
+		}
+	}
+	
+	int boo_num = 0;
+	if (A[0] > 0)
+	{
+		while (A[0] > 0) {
+			A[0] -= c;
+			boo_num++;
+		}
+		boo[0] = boo_num;
+	}
+
+	for (int i = 1; i < n; i++) {
+		boo_num = 0;
+		if (A[i] > 0) {
+			A[i] -= (c * boo[i-1]);			//감시해야 할 학생수 업데이트
+			boo_num += boo[i-1];			//오름차순으로 정렬되어있기 떄문에, 어쨋든 그 이전에 필요했던 부 감독관 수 보다는 같거나 더 많이 필요
+		}
+		while (A[i] > 0) {
+			A[i] -= c;
+			boo_num++;
+		}
+		boo[i] = boo_num;
+	}
+
+	ans += n;
+	for (int i = 0; i < n; i++) {
+		ans += boo[i];
+	}
+	cout << ans << endl;
+	return 0;
+}
