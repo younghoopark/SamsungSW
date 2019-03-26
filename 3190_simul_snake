@@ -1,0 +1,100 @@
+#include <iostream>
+#include <deque>
+using namespace std;
+
+struct MOVE {
+	int x;
+	char c;
+};
+struct SNAKE {
+	int r, c;			//뱜의 머리 위치
+	char dir;
+};
+struct POSI{
+	int r, c;
+};
+int n, k, l, map[101][101], ans = 0;
+int umove[2] = { -1,0 }, dmove[2] = { 1, 0 }, lmove[2] = { 0,-1 }, rmove[2] = { 0,1 };
+MOVE moving[101];
+SNAKE snake;
+deque<POSI> dq;
+int main()
+{
+	cin >> n;
+	cin >> k;
+	int r, c;
+	for (int i = 0; i < k; i++) {
+		cin >> r >> c;
+		map[r][c] = 2;		//map에 "2"로 표시된 애는 "사과"
+	}
+	cin >> l;
+	for (int i = 0; i < l; i++) {
+		cin >> moving[i].x >> moving[i].c;
+	}
+
+	/* 솔루션 */
+	snake.r = 1, snake.c = 1, snake.dir = 'R';
+	POSI posi;
+	posi.r = snake.r, posi.c = snake.c;
+	dq.push_back(posi);
+	while (snake.r >= 1 && snake.r <= n && snake.c >= 1 && snake.c <= n) {		//뱀이 벽에 닿기 전까지
+		if (snake.dir == 'R') {					//현재 뱀이 움직이는 방향이 오른쪽 일경우
+			snake.r = snake.r + rmove[0];
+			snake.c = snake.c + rmove[1];
+		}
+		else if (snake.dir == 'L') {			//왼쪽일 경우
+			snake.r = snake.r + lmove[0];
+			snake.c = snake.c + lmove[1];
+		}
+		else if (snake.dir == 'U') {			//위쪽일 경우
+			snake.r = snake.r + umove[0];
+			snake.c = snake.c + umove[1];
+		}
+		else if (snake.dir == 'D') {			//아래쪽일 경우
+			snake.r = snake.r + dmove[0];
+			snake.c = snake.c + dmove[1];
+		}
+		for (int j = 0; j < l; j++) {			//방향 전환을 위한 check
+			moving[j].x -= 1;
+			if (moving[j].x == 0) {				//0이 되었다는건 방향전환 할 시간이 다 되었다는 뜻이므로, 뱀의 이동 방향을 업데이트 해준다.
+				/* 여기서 방향 전환 */
+				if (moving[j].c == 'L') {
+					if (snake.dir == 'R') snake.dir = 'U';
+					else if (snake.dir == 'L') snake.dir = 'D';
+					else if (snake.dir == 'U') snake.dir = 'L';
+					else if (snake.dir == 'D') snake.dir = 'R';
+				}
+				else if (moving[j].c == 'D') {
+					if (snake.dir == 'R') snake.dir = 'D';
+					else if (snake.dir == 'L') snake.dir = 'U';
+					else if (snake.dir == 'U') snake.dir = 'R';
+					else if (snake.dir == 'D') snake.dir = 'L';
+				}
+			}
+		}
+		
+		ans++;
+		posi.r = snake.r, posi.c = snake.c;		//뱀의 정보를 담고 있는 queue에 현재 뱀이 방문한 위치 push(언젠가는 얘가 꼬리가 되겠지)
+		dq.push_back(posi);
+		
+		if (snake.r < 1 || snake.r > n || snake.c < 1 || snake.c > n) {		//뱀이 이동한 위치에 벽이 있을 때, 탈출
+			break;
+		}
+		int flag = 0;
+		for (int j = 0; j < dq.size() - 1; j++) {
+			if (dq[j].r == snake.r && dq[j].c == snake.c) {			//뱀이 이동한 위치에 뱀의 몸이 있을 떄, 탈출
+				flag = 1; break;
+			}
+		}
+		if (flag == 1) break;
+		/* 뱀이 이동한 곳에 사과가 없을 때(이때는 pop해줘) (뱀의 꼬리를 잘라내야하니까) */
+		if (map[snake.r][snake.c] == 0) {	
+			dq.pop_front();
+		}
+		else if (map[snake.r][snake.c] == 2) {
+			map[snake.r][snake.c] = 0;
+		}
+	}
+	cout << ans << endl;
+	return 0;
+}
