@@ -1,0 +1,135 @@
+#include <iostream>
+
+using namespace std;
+
+struct AIRCLEANER {
+	int y, x;
+};
+
+int r, c, t;
+int map[50][50];
+AIRCLEANER pos[2];
+int posidx = 0;
+int dy[4] = { -1,+1,0,0 };
+int dx[4] = { 0,0,-1,+1 };
+
+void spread_dust() {
+	int plus_dust[50][50] = { 0, };
+	int minus_dust[50][50] = { 0, };
+	int spread_cnt;
+	plus_dust[pos[0].y][pos[0].x] = -1;
+	plus_dust[pos[1].y][pos[1].x] = -1;
+
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			if (map[y][x] > 0 && map[y][x] != -1) {
+				spread_cnt = 0;
+				for (int dir = 0; dir < 4; dir++) {
+					int newy = y + dy[dir];
+					int newx = x + dx[dir];
+					if (newy < 0 || newy >= r || newx < 0 || newx >= c || (newy == pos[0].y && newx == pos[0].x) || (newy == pos[1].y && newx == pos[1].x)) {
+						continue;
+					}
+					plus_dust[newy][newx] += map[y][x] / 5;
+					++spread_cnt;
+				}
+				minus_dust[y][x] += ((map[y][x] / 5) * spread_cnt);
+			}
+		}
+	}
+
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			if ((y == pos[0].y && x == pos[0].x) || (y == pos[1].y && x == pos[1].x)) {
+				continue;
+			}
+			map[y][x] += plus_dust[y][x];
+			map[y][x] -= minus_dust[y][x];
+		}
+	}
+}
+
+void airclean() {
+	int tmp[50][50];
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			tmp[y][x] = map[y][x];
+		}
+	}
+	/* 공기청정기 상단 */
+	for (int x = pos[0].x; x < c - 1; x++) {
+		if (x == pos[0].x) {
+			tmp[pos[0].y][x + 1] = 0;
+			continue;
+		}
+		tmp[pos[0].y][x + 1] = map[pos[0].y][x];
+	}
+	
+	for (int y = pos[0].y; y > 0; y--) {
+		tmp[y - 1][c - 1] = map[y][c - 1];
+	}
+	for (int x = c - 1; x > 0; x--) {
+		tmp[0][x - 1] = map[0][x];
+	}
+	for (int y = 0; y < pos[0].y - 1; y++) {
+		tmp[y + 1][0] = map[y][0];
+	}
+
+	/* 공기청정기 하단 */
+	for (int x = pos[1].x; x < c - 1; x++) {
+		if (x == pos[1].x) {
+			tmp[pos[1].y][x + 1] = 0;
+			continue;
+		}
+		tmp[pos[1].y][x + 1] = map[pos[1].y][x];
+	}
+	for (int y = pos[1].y; y < r - 1; y++) {
+		tmp[y + 1][c - 1] = map[y][c - 1];
+	}
+	for (int x = c - 1; x > 0; x--) {
+		tmp[r - 1][x - 1] = map[r - 1][x];
+	}
+	for (int y = r - 1; y > pos[1].y + 1; y--) {
+		tmp[y - 1][0] = map[y][0];
+	}
+	/* 복사 */
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			map[y][x] = tmp[y][x];
+		}
+	}
+}
+
+int main()
+{
+	scanf("%d %d %d", &r, &c, &t);
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			scanf("%d", &map[y][x]);
+			if (map[y][x] == -1) {
+				pos[posidx].y = y, pos[posidx].x = x;
+				posidx += 1;
+			}
+		}
+	}
+
+	for (int i = 0; i < t; i++) {		//1초 단위로 미세먼지, 공기청정기 확산
+		// 미세먼지 확산
+		spread_dust();
+
+		// 공기청정기 동작
+		airclean();
+	}
+
+	int ans = 0;
+	for (int y = 0; y < r; y++) {
+		for (int x = 0; x < c; x++) {
+			if (map[y][x] != -1) {
+				ans += map[y][x];
+			}
+		}
+	}
+	printf("%d\n", ans);
+
+	return 0;
+}
