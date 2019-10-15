@@ -1,0 +1,162 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct NUMCOUNT {
+	int num, cnt;
+};
+
+int r, c, k;
+int A[101][101] = { -1, };
+
+
+bool comp(NUMCOUNT a, NUMCOUNT b) {
+	if (a.cnt == b.cnt) {
+		return a.num < b.num;
+	}
+	return a.cnt < b.cnt;
+}
+
+void r_sort(int r_num, int c_num) {
+	int max_c = 0;
+	for (int y = 1; y <= r_num; y++) {
+		NUMCOUNT numcnt[101];
+		for (int i = 0; i < 101; i++) {
+			numcnt[i].num = 101, numcnt[i].cnt = 101;
+		}
+		for (int x = 1; x <= c_num; x++) {
+			if (A[y][x] != -1 && A[y][x] != 0) {
+				if (numcnt[A[y][x]].cnt == 101) {
+					numcnt[A[y][x]].num = A[y][x];
+					numcnt[A[y][x]].cnt = 1;
+				}
+				else {
+					numcnt[A[y][x]].cnt += 1;
+				}
+				A[y][x] = 0;
+			}
+		}
+		/* numcnt 값을 통해 A[y][] 행 소트된 값으로 업데이트 */
+		sort(numcnt, numcnt + 101, comp);
+		int idx = 0;
+		for (int x = 1; x < 100; x = x + 2) {
+			if (numcnt[idx].cnt == 101) {
+				break;
+			}
+			A[y][x] = numcnt[idx].num;
+			A[y][x + 1] = numcnt[idx].cnt;
+			++idx;
+		}
+		if (max_c < idx) {
+			max_c = idx;
+		}
+	}
+
+	/* 나머지 부분 0으로 채워주기 */
+	max_c *= 2;
+	for (int y = 1; y <= r_num; y++) {
+		for (int x = 1; x <= max_c; x++) {
+			if (A[y][x] == -1) {
+				A[y][x] = 0;
+			}
+		}
+	}
+}
+
+void c_sort(int r_num, int c_num) {
+	int max_r = 0;
+	for (int x = 1; x <= c_num; x++) {
+		NUMCOUNT numcnt[101];
+		for (int i = 0; i < 101; i++) {
+			numcnt[i].num = 101, numcnt[i].cnt = 101;
+		}
+		for (int y = 1; y <= r_num; y++) {
+			if (A[y][x] != -1 && A[y][x] != 0) {
+				if (numcnt[A[y][x]].cnt == 101) {
+					numcnt[A[y][x]].num = A[y][x];
+					numcnt[A[y][x]].cnt = 1;
+				}
+				else {
+					numcnt[A[y][x]].cnt += 1;
+				}
+				A[y][x] = 0;
+			}
+		}
+		/* numcnt 값을 통해 A[][x] 열 소트된 값으로 업데이트 */
+		sort(numcnt, numcnt + 101, comp);
+		int idx = 0;
+		for (int y = 1; y < 100; y = y + 2) {
+			if (numcnt[idx].cnt == 101) {
+				break;
+			}
+			A[y][x] = numcnt[idx].num;
+			A[y + 1][x] = numcnt[idx].cnt;
+			++idx;
+		}
+		if (max_r < idx) {
+			max_r = idx;
+		}
+	}
+
+	/* 나머지 부분 0으로 채워주기 */
+	max_r *= 2;
+	for (int x = 1; x <= c_num; x++) {
+		for (int y = 1; y <= max_r; y++) {
+			if (A[y][x] == -1) {
+				A[y][x] = 0;
+			}
+		}
+	}
+}
+
+void solution() {
+	int r_num = 0;
+	int c_num = 0;
+	/* 현재 배열의 row사이즈와 column사이즈 계산, 만약 row가 3줄이면 r_num은 3.  column도 마찬가지 */
+	for (int y = 1; y < 101; y++) {
+		if (A[y][1] == -1) {
+			r_num = y - 1; break;
+		}
+	}
+	for (int x = 1; x < 101; x++) {
+		if (A[1][x] == -1) {
+			c_num = x - 1; break;
+		}
+	}
+	
+	if (r_num >= c_num) {
+		r_sort(r_num, c_num);
+	}
+	else {
+		c_sort(r_num, c_num);
+	}
+}
+
+int main()
+{
+	scanf("%d %d %d", &r, &c, &k);
+	for (int y = 0; y < 101; y++) {
+		for (int x = 0; x < 101; x++) {
+			A[y][x] = -1;
+		}
+	}
+	for (int y = 1; y < 4; y++) {
+		for (int x = 1; x < 4; x++) {
+			scanf("%d", &A[y][x]);
+		}
+	}
+
+	int time = 0;
+	while (A[r][c] != k) {
+		time++;
+		if (time > 100) {
+			time = -1;
+			break;
+		}
+		solution();
+	}
+
+	printf("%d\n", time);
+
+	return 0;
+}
