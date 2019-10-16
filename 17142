@@ -1,0 +1,128 @@
+#include <iostream>
+#include <queue>
+using namespace std;
+
+struct VIRUS {
+	int y, x;
+	int time;
+};
+
+
+int n, m;
+int map[50][50] = { 0, };
+VIRUS virus[10] = { 0, };
+int visited[10] = { 0, };
+int vidx = 0, vnum = 0;		//virus index, virus의 개수
+int dy[4] = { -1, +1, 0, 0 };
+int dx[4] = { 0, 0, -1, +1 };
+
+int ans = 99999;
+
+
+void spread_virus() {
+	/* 바이러스 퍼트리고 다 퍼질때 까지 몇초가 걸리는지 계산 */
+	int maptmp[50][50] = { 0, };
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			if (map[y][x] == 1) {						//벽일 경우
+				maptmp[y][x] = -2;						//벽은 -2로 (- 대신)
+			}
+			else if (map[y][x] == 0) {					//빈공간 일 경우
+				maptmp[y][x] = -3;
+			}
+			else {
+				maptmp[y][x] = map[y][x];
+			}
+		}
+	}
+	queue<VIRUS> q;
+	for (int i = 0; i < vnum; i++) {
+		if (visited[i] == 1) {
+			maptmp[virus[i].y][virus[i].x] = 0;			//활성화된 바이러스는 0로
+			q.push(virus[i]);
+		}
+		else {											//비활성화된 바이러스는 -1로 (* 대신)
+			maptmp[virus[i].y][virus[i].x] = -1;
+		}
+	}
+	
+	int maxtime = 0;
+	while (!q.empty()) {
+		VIRUS cur = q.front();	q.pop();
+		if (cur.time > maxtime && maptmp[cur.y][cur.x] != 0) {
+			maxtime = cur.time;
+		}
+		for (int dir = 0; dir < 4; dir++) {
+			int newy = cur.y + dy[dir];
+			int newx = cur.x + dx[dir];
+			if (newy < 0 || newy >= n || newx < 0 || newx >= n) {			//범위 밖일 경우
+				continue;
+			}
+			if (maptmp[newy][newx] == -2) {									//벽일 경우
+				continue;
+			}
+			if (maptmp[newy][newx] == -1) {									//비활성화된 바이러스일 경우
+				maptmp[newy][newx] = 0;
+				VIRUS activatevirus;
+				activatevirus.y = newy, activatevirus.x = newx, activatevirus.time = cur.time + 1;
+				q.push(activatevirus);
+			}
+			if (maptmp[newy][newx] == -3) {									//빈공간일 경우
+				maptmp[newy][newx] = cur.time + 1;
+				VIRUS newvirus;
+				newvirus.y = newy, newvirus.x = newx, newvirus.time = cur.time + 1;
+				q.push(newvirus);
+			}
+		}
+	}
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			if (maptmp[y][x] == -3) {		//BFS를 다 돌았는데 빈공간이 남아있으면
+				maxtime = -1;
+			}
+		}
+	}
+	if (maxtime != -1 && maxtime < ans) {
+		ans = maxtime;
+	}
+}
+
+void dfs(int cnt, int idx) {
+	if (cnt == m) {
+		spread_virus();
+		return;
+	}
+	
+	for (int i = idx; i < vnum; i++) {
+		if (visited[i] == 0) {
+			visited[i] = 1;
+			dfs(cnt + 1, i);
+			visited[i] = 0;
+		}
+	}
+}
+
+
+int main()
+{
+	scanf("%d %d", &n, &m);
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			scanf("%d", &map[y][x]);
+			if (map[y][x] == 2) {
+				virus[vidx].y = y, virus[vidx].x = x, virus[vidx].time = 0;
+				++vidx;
+			}
+		}
+	}
+	vnum = vidx;		//바이러스가 들어갈 수 있는 위치(2의 개수)의 수를 vnum에 저장
+	
+	dfs(0, 0);
+	
+	if (ans == 99999) {
+		ans = -1;
+	}
+	printf("%d\n", ans);
+
+	return 0;
+}
