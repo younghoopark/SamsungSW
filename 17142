@@ -49,7 +49,7 @@ void spread_virus() {
 	int maxtime = 0;
 	while (!q.empty()) {
 		VIRUS cur = q.front();	q.pop();
-		if (cur.time > maxtime && maptmp[cur.y][cur.x] != 0) {
+		if (cur.time > maxtime && maptmp[cur.y][cur.x] > 0) {
 			maxtime = cur.time;
 		}
 		for (int dir = 0; dir < 4; dir++) {
