@@ -1,0 +1,139 @@
+#include <iostream>
+#include <deque>
+#include <algorithm>
+using namespace std;
+
+struct TREE {
+	int y, x; //나무의 좌표
+	int age; //나무의 나이
+};
+
+int n, m, k;
+int A[10][10] = { 0, };			//겨울에 추가될 양분의 양
+int yangboon[10][10] = { 0, };		//양분의 양 저장
+int dy[8] = { -1, -1, -1, 0, 0, +1, +1, +1 };
+int dx[8] = { -1, 0, +1, -1, +1, -1, 0, +1 };
+deque<TREE> treeinfo[10][10];
+deque<TREE> dietree[10][10];
+TREE tree[100] = { 0, };
+
+bool comp(TREE a, TREE b) {
+	return a.age < b.age;
+}
+
+void spring() {
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			if (treeinfo[y][x].empty()) {			//해당 위치에 나무가 없으면 continue
+				continue;
+			}
+			/* 해당 위치에 나무가 있으면 양분을 먹음 */
+			int treeinfosize = treeinfo[y][x].size();
+			for (int i = 0; i < treeinfosize; i++) {
+				if (treeinfo[y][x][i].age > yangboon[y][x]) {
+					/* 나무 사망 */
+					int idx = i;		//사망한 나무의 시작 인덱스
+					for (int j = i; j < treeinfosize; j++) {
+						//dietree[y][x].push_back(treeinfo[y][x][idx]);
+						//treeinfo[y][x].erase(treeinfo[y][x].begin() + idx);
+						dietree[y][x].push_back(treeinfo[y][x][j]);
+					}
+					treeinfo[y][x].erase(treeinfo[y][x].begin() + idx, treeinfo[y][x].end()); /////
+					break;
+				}
+				yangboon[y][x] -= treeinfo[y][x][i].age;
+				treeinfo[y][x][i].age += 1;
+			}
+		}
+	}
+}
+void summer() {
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			if (dietree[y][x].empty()) {
+				continue;
+			}
+			int dietreesize = dietree[y][x].size();
+			for (int i = 0; i < dietreesize; i++) {
+				//yangboon[y][x] += (dietree[y][x].front().age / 2);
+				//dietree[y][x].pop_front();
+				yangboon[y][x] += (dietree[y][x][i].age / 2);
+			}
+			dietree[y][x].erase(dietree[y][x].begin(), dietree[y][x].end());  //////
+		}
+	}
+}
+void fall() {
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			if (treeinfo[y][x].empty()) {
+				continue;
+			}
+			for (int i = 0; i < treeinfo[y][x].size(); i++) {
+				if (treeinfo[y][x][i].age % 5 == 0) {
+					for (int dir = 0; dir < 8; dir++) {
+						int newy = y + dy[dir];
+						int newx = x + dx[dir];
+						if (newy < 0 || newy >= n || newx < 0 || newx >= n) {
+							continue;
+						}
+						TREE newtree;
+						newtree.y = newy, newtree.x = newx, newtree.age = 1;
+						treeinfo[newy][newx].push_front(newtree);
+					}
+				}
+			}
+		}
+	}
+}
+void winter() {
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			yangboon[y][x] += A[y][x];
+		}
+	}
+}
+
+int main()
+{
+	scanf("%d %d %d", &n, &m, &k);		// n 은 땅 size,  m은 상도가 심은 나무의 개수, k는 년수
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			scanf("%d", &A[y][x]);
+			yangboon[y][x] = 5; //양분의 양을 저장하고 있는 배열(초기에는 모든 좌표에 양분이 5)
+		}
+	}
+	for (int i = 0; i < m; i++) { //상도가 심은 나무의 정보 입력받기
+		scanf("%d %d %d", &tree[i].y, &tree[i].x, &tree[i].age);
+		tree[i].y -= 1;		//문제에서 주어지는 값은 r, c 인덱스가 1부터 시작하니깐.
+		tree[i].x -= 1;
+		int y = tree[i].y;
+		int x = tree[i].x;
+		treeinfo[y][x].push_back(tree[i]);
+	}
+	for (int y = 0; y < n; y++) {		//treeinfo deque를 나무의 나이에 맞게 소트
+		for (int x = 0; x < n; x++) {
+			if (!treeinfo[y][x].empty()) {
+				int treenum = treeinfo[y][x].size();
+				sort(treeinfo[y][x].begin(), treeinfo[y][x].end(), comp);
+			}
+		}
+	}
+
+	for (int year = 0; year < k; year++) { //k년
+	/* TODO */
+		spring();
+		summer();
+		fall();
+		winter();
+	}
+
+	int ans = 0;
+	for (int y = 0; y < n; y++) {
+		for (int x = 0; x < n; x++) {
+			ans += treeinfo[y][x].size();
+		}
+	}
+	printf("%d\n", ans);
+	return 0;
+}
